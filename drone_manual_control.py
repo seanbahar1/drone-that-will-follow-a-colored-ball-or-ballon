@@ -7,8 +7,9 @@ from pymavlink import mavutil
 class droneCommands:
     def __init__(self, COM_PORT_IP):
         # Connect to UDP endpoint.
-        self.vehicle = dronekit.connect(COM_PORT_IP, wait_ready=False, baud=57600 ) #-- if we using ip : '127.0.0.1:14550' #-- if using COM :: manual find : 'COMx' usualy COM3
         self.gnd_speed = 5 #[m/s]
+        #-- if we using ip : '127.0.0.1:14550' #-- if using COM :: manual find : 'COMx' usualy COM3
+        self.vehicle = dronekit.connect(COM_PORT_IP, wait_ready=False, baud=57600 ) 
         self.drone_running = True
         print("Mode: %s" % self.vehicle.mode.name)
         self.flight_mode_with_or_without_reset = False
