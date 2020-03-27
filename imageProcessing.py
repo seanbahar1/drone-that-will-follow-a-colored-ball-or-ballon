@@ -1,14 +1,6 @@
-######### TODO #########
-# safe area needs to update its size when the object radius changes
-# set a timer so if the object is lost for more than 5 sec auto move to rtl mode
-# add a class that have all the drone control functions
-# add more comments
-# try to make the tracking more consistant cause light is a bitch
-
 from collections import deque
 from  drone_manual_control import droneCommands
 from  imageMath import importantMath
-#from imutils.video import VideoStream
 import numpy as np
 import imutils
 import cv2
@@ -20,10 +12,11 @@ cap = cv2.VideoCapture(0)
 ret, image = cap.read()
 
 tracking = True
-
+#com port
+COM = "COM[num]"
 #initiating the important math class
 data = importantMath(image)
-drone = droneCommands("COM4")
+drone = droneCommands(COM)
 # text style For x,y
 font = cv2.FONT_HERSHEY_SIMPLEX
 bottomLeftCornerOfText = (0, 20)
@@ -62,8 +55,7 @@ if tracking:
         colourLower = (thrs[0], thrs[1], thrs[2])
         colourUpper = (thrs[3], thrs[4], thrs[5])
 
-        # resize the frame, blur it, and convert it to the HSV
-        # color space
+        # resize the frame
         image = imutils.resize(image, width=600)
 
         # construct a mask for the object colour, then perform
@@ -112,26 +104,27 @@ if tracking:
         data.safeAreaZone()
         safeZoneRad = data.get_safe_zone_rad()
 
-        #-- calculating which commands to send to the drone
+        #-- deciding which command to send to the drone
         if data.return_distance_from_center() < safeZoneRad:
-            #-- this rins when the object is in the safe area
+            #-- this runs when the object is in the safe area
             #-- drone will only move forwards or backwards here (or not at all and just hold itself in the air)
             if data.objRad > data.objTooCloseRad:
                 #-- object is too close
                 #-- drone will move backwards
-                    #-- moving backwards
-                    drone.down()
+                    #-- moving backward
+		    sendCommandsMultipleTimesToInsureDelivery(drone.requestAmount, drone.requestDelay, drone.down())
 
             elif data.objRad < data.objTooFarRad:
                 #-- object is too far
                 #-- drone will move forward
                     #-- moving forward
-                    drone.up()
+		    sendCommandsMultipleTimesToInsureDelivery(drone.requestAmount, drone.requestDelay, drone.up())
 
             else:
                 #-- this means the distance is ok and we can stay at the same place
                     #-- this will reset velocity for now
-                    drone.reset_velocity() 
+                    drone.reset_velocity()
+		    sendCommandsMultipleTimesToInsureDelivery(drone.requestAmount, drone.requestDelay, drone.reset_velocity())
 
         else:
             #-- this runs when the object is outside the safe area
